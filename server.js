@@ -4,13 +4,15 @@ const app = express();
 
 app.get('/source', async (req, res) => {
   const targetUrl = req.query.url;
-  if (!targetUrl) return res.status(400).send('Missing ?url param');
-  
+  if (!targetUrl) {
+    return res.status(400).json({ error: "Missing ?url parameter" });
+  }
+
   try {
     const response = await axios.get(targetUrl, { responseType: 'text' });
-    res.type('text/plain').send(response.data);
+    res.status(200).json({ source: response.data });
   } catch (err) {
-    res.status(500).send(`Error fetching URL: ${err.message}`);
+    res.status(500).json({ error: `Failed to fetch URL: ${err.message}` });
   }
 });
 
