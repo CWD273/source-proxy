@@ -1,23 +1,20 @@
 const express = require('express');
 const axios = require('axios');
-const cheerio = require('cheerio'); // Library for parsing HTML
 const app = express();
 
 app.get('/source', async (req, res) => {
     const targetUrl = req.query.url;
-    if (!targetUrl) return res.status(400).send('<p>Missing ?url parameter</p>');
+    if (!targetUrl) return res.status(400).send('Missing ?url parameter');
 
     try {
-        const response = await axios.get(targetUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-        const $ = cheerio.load(response.data);
+        const response = await axios.get(targetUrl, { responseType: 'text' });
 
-        // Extract cleaned-up content
-        const content = $('body').html();
-        const styles = $('head').html(); // Capture original styles
-
-        res.send(`<html><head>${styles}</head><body>${content}</body></html>`);
+        // Force browser to display raw source code
+        res.setHeader('Content-Type', 'text/plain');
+        res.send(response.data);
     } catch (err) {
-        res.send(`<p>Error fetching URL: ${err.message}</p>`);
+        res.setHeader('Content-Type', 'text/plain');
+        res.send(`Error fetching source: ${err.message}`);
     }
 });
 
